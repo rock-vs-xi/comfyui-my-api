@@ -48,7 +48,9 @@ pip install boto3 pillow
   "comfyui_poll_interval_seconds": 2,
   "comfyui_poll_timeout_seconds": 120,
   "cutout_task_ttl_seconds": 3600,
-  "cutout_task_max_count": 1000
+  "cutout_task_max_count": 1000,
+  "birefnet_model": "ZhengPeng7/BiRefNet",
+  "birefnet_load_local_model": true
 }
 ```
 

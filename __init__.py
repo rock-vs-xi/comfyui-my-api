@@ -61,6 +61,8 @@ COMFYUI_POLL_INTERVAL_SECONDS = float(config.get("comfyui_poll_interval_seconds"
 COMFYUI_POLL_TIMEOUT_SECONDS = int(config.get("comfyui_poll_timeout_seconds", 120))
 CUTOUT_TASK_TTL_SECONDS = int(config.get("cutout_task_ttl_seconds", 3600))
 CUTOUT_TASK_MAX_COUNT = int(config.get("cutout_task_max_count", 1000))
+BIREFNET_MODEL = config.get("birefnet_model", "ZhengPeng7/BiRefNet")
+BIREFNET_LOAD_LOCAL_MODEL = bool(config.get("birefnet_load_local_model", True))
 
 CUTOUT_TASKS = {}
 
@@ -78,8 +80,8 @@ REMOVE_BACKGROUND_WORKFLOW = {
         },
         "11": {
             "inputs": {
-                "model": "ZhengPeng7/BiRefNet",
-                "load_local_model": False,
+                "model": "@birefnet_model@",
+                "load_local_model": "@birefnet_load_local_model@",
                 "background_color_name": "transparency",
                 "device": "auto",
                 "image": [
@@ -270,6 +272,8 @@ def build_workflow_json(image_name, client_id):
     workflow = copy.deepcopy(REMOVE_BACKGROUND_WORKFLOW)
     workflow["client_id"] = client_id
     workflow["prompt"]["10"]["inputs"]["image"] = image_name
+    workflow["prompt"]["11"]["inputs"]["model"] = BIREFNET_MODEL
+    workflow["prompt"]["11"]["inputs"]["load_local_model"] = BIREFNET_LOAD_LOCAL_MODEL
     return workflow
 
 
