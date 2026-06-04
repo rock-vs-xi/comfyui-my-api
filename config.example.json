@@ -1,0 +1,14 @@
+{
+  "r2_account_id": "your-r2-account-id",
+  "r2_access_key": "your-r2-access-key",
+  "r2_secret_key": "your-r2-secret-key",
+  "r2_bucket_name": "rembg",
+  "r2_public_base": "https://your-result-public-domain.example.com",
+  "comfyui_base_url": "http://127.0.0.1:7860",
+  "comfyui_api_key": "",
+  "comfyui_timeout_seconds": 180,
+  "comfyui_poll_interval_seconds": 2,
+  "comfyui_poll_timeout_seconds": 120,
+  "cutout_task_ttl_seconds": 3600,
+  "cutout_task_max_count": 1000
+}
