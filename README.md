@@ -42,7 +42,7 @@ pip install boto3 pillow
   "r2_secret_key": "your-r2-secret-key",
   "r2_bucket_name": "rembg",
   "r2_public_base": "https://your-result-public-domain.example.com",
-  "comfyui_base_url": "http://127.0.0.1:7860",
+  "comfyui_base_url": "http://127.0.0.1:8188",
   "comfyui_api_key": "",
   "comfyui_timeout_seconds": 180,
   "comfyui_poll_interval_seconds": 2,
@@ -139,11 +139,11 @@ GET /my_api/health/full
 ## 调试
 
 ```bash
-curl http://127.0.0.1:7860/my_api/ping
+curl http://127.0.0.1:8188/my_api/ping
 
-curl -X POST "http://127.0.0.1:7860/my_api/cutout/start" \
+curl -X POST "http://127.0.0.1:8188/my_api/cutout/start" \
   -H "Content-Type: application/json" \
   -d '{"inputImage":"https://example.com/input.jpg"}'
 
-curl "http://127.0.0.1:7860/my_api/cutout/result?taskId=xxx"
+curl "http://127.0.0.1:8188/my_api/cutout/result?taskId=xxx"
 ```

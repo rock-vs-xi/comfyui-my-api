@@ -4,7 +4,7 @@
   "r2_secret_key": "your-r2-secret-key",
   "r2_bucket_name": "rembg",
   "r2_public_base": "https://your-result-public-domain.example.com",
-  "comfyui_base_url": "http://127.0.0.1:7860",
+  "comfyui_base_url": "http://127.0.0.1:8188",
   "comfyui_api_key": "",
   "comfyui_timeout_seconds": 180,
   "comfyui_poll_interval_seconds": 2,
