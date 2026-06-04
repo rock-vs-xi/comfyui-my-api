@@ -61,10 +61,38 @@ COMFYUI_POLL_INTERVAL_SECONDS = float(config.get("comfyui_poll_interval_seconds"
 COMFYUI_POLL_TIMEOUT_SECONDS = int(config.get("comfyui_poll_timeout_seconds", 120))
 CUTOUT_TASK_TTL_SECONDS = int(config.get("cutout_task_ttl_seconds", 3600))
 CUTOUT_TASK_MAX_COUNT = int(config.get("cutout_task_max_count", 1000))
-BIREFNET_MODEL = config.get("birefnet_model", "ZhengPeng7/BiRefNet")
+BIREFNET_MODEL = config.get("birefnet_model", "BiRefNet")
 BIREFNET_LOAD_LOCAL_MODEL = bool(config.get("birefnet_load_local_model", True))
 
 CUTOUT_TASKS = {}
+IMG2IMG_TASKS = {}
+
+IMG2IMG_CONFIGS = {
+    "1": {
+        "positive": "Underwater scene, realistic underwater photography, soft flowing hair or fabric drifting in water, medium or close-up shot, smooth blurry background, shimmering wet skin with visible water droplets, dense floating underwater bubbles, clusters of rising air bubbles around the subject, fine micro-bubbles scattered throughout the water, layered depth bubbles for realism, intense underwater refraction effects, detailed light caustics on body and surfaces, numerous large and medium vibrant orange and white tropical fish swimming clearly around the subject, koi-like but larger and visible fish, fish moving at multiple depths, some fish in the foreground, sunlight rays filtering through the water, vivid underwater color scattering, high-detail textures, calm and dreamy underwater atmosphere, extremely dense bubbles and abundant fish, fish clearly visible, prominent and colorful",
+        "negative": "NSFW,NSFW,nude,naked,porn,(worst quality, low quality:1.4),deformediris,deformed pupils,(deformed, distorted, disfigured:1.3),croppedout of frame,poorly drawn,bad anatomy,wrong anatomy,extra limb,missing limb,floating limbs,cloned face,(mutated hands andfingers:1.4),disconnected limbs,extra legs,fused fingers,too manyfingers,long neck,mutation,mutated,ugly,disgusting,amputation,blurry,jpeg artifacts,watermark,watermarked,text,Signature,sketch,bad hands,stiff,joint malposition,multi-hand,joint malposition,",
+        "lora": "F.1-Krea 本子 _ 水下人物摄影写真_1.0.safetensors",
+        "denoise": 0.68
+    },
+    "2": {
+        "positive": "shonen anime protagonist style, strong main-character presence, heroic and confident aura, dynamic and powerful main-character pose, intense and dramatic lighting focused on the character, bold contrast and sharp dramatic shading, vibrant and energetic shonen anime color palette, crisp bold and clean lineart, sharp and determined facial expression, windswept dynamic highly detailed anime hair, subtle rim light outlining the silhouette, glowing effects and main-character highlight emphasis, epic action-focused composition, cinematic depth with dynamic camera angle, energetic atmosphere filled with motion and impact, youthful brave optimistic heroic vibe, high-quality anime illustration, clear protagonist framing and visual storytelling, strong sense of power momentum and purpose, professional shonen anime key visual style",
+        "negative": "(EasyNegative,ng_deepnegative_v1_75t:1.2),(NSFW:1.5),(worst quality:2),(low quality:2),(normal quality:2),lowres,watermark,((monochrome)),((grayscale)),skin spots,acnes,skin blemishes,age spot,(ugly:1.331),(duplicate:1.331),(morbid:1.21),(mutilated:1.21),mutated hands,(poorly drawn hands:1.5),blurry,(bad anatomy:1.21),(bad proportions:1.331),EasyNegative,bad-hands-5,(worst quality, low quality:1.4),(nsfw:1.51)+(naked:1.5),(bareness:1.5),lowres,bad anatomy,bad hands,text,error,missing fingers,extra digit,fewer digits,cropped,worst quality,low quality,normal quality,jpeg artifacts,signature,watermark,username,blurry,artist name,label,(front view:1.2),multiple heads,two heads",
+        "lora": "漫画男主角(壁纸)面部专用_v1.0.safetensors",
+        "denoise": 0.8
+    },
+    "3": {
+        "positive": "Japanese anime illustration style, sweet lolita aesthetic, soft and cute atmosphere, fresh and vibrant color palette, pastel tones, exquisite details and delicate textures, smooth and refined shading, cel-shading with soft gradients, refined facial features with flawless skin, detailed and silky hair strands with a fluffy airy hairstyle, large expressive anime eyes with sparkling highlights, sharp and clean lineart with elegant contours, soft atmospheric lighting with a gentle glow, dreamy and soothing ambience, glowing star particles and subtle snowflake effects, fairy-tale mood with warm magical lighting, high-quality anime rendering, harmonious and elegant composition, visually appealing cute charming and aesthetic presentation, modest lolita outfit, cute frilly dress, no cleavage, no deep neckline, no revealing clothes, no see-through clothing, fully-covered chest design, decorative ribbons lace and bows\n",
+        "negative": "ng_deepnegative_v1_75t, EasyNegative, (badhandv4:1.2), (worst quality:2), (low quality:2), (normal quality:2), (lowres:1.2), (blurry:1.1), (bad anatomy:1.3), (bad proportions:1.3), (deformed:1.2), (disfigured:1.2), (ugly:1.2), (long neck:1.2), (extra fingers:1.3), (missing fingers:1.3), (fused fingers:1.3), (jpeg artifacts), (signature), (watermark), (text), (logo), (cropped), (error), (duplicate:1.2), (overexposed), (underexposed), (glitch), (noise), (morbid:1.2), (mutilated:1.2), (body distortion), (saturation issues), (color bleeding), (nsfw:2.0), (nudity:2.0), (sexual content:2.0), (naked:2.0), (cleavage:1.8), (see-through clothing:2.0), (revealing clothes:2.0), (bikini:1.8), (underboob:2.0), (lingerie:2.0), (transparent clothes:2.0), (deep neckline:2.0)",
+        "lora": "洛丽塔甜系少女_v1.0.safetensors",
+        "denoise": 0.8
+    },
+    "4": {
+        "positive": "Hand-drawn illustration,hand-drawn cat illustration,watercolor illustration,best quality a yellow cat,blue sky,cat,cloud,cloudy sky,condensation trail,day,field,grass,lens flare,no humans,outdoors,palm tree,plant,power lines,sky,tree,hand-drawn illustration,hand-drawn cat illustration,watercolor illustration,best quality,",
+        "negative": "ng_deepnegative_v1_75t,(badhandv4:1.2),EasyNegative,(worst quality:2),",
+        "lora": "Cut_Cat可爱猫咪动物宠物手绘涂鸦_v1.0.safetensors",
+        "denoise": 0.75
+    }
+}
 
 REMOVE_BACKGROUND_WORKFLOW = {
     "client_id": "@client_id@",
@@ -121,6 +149,108 @@ REMOVE_BACKGROUND_WORKFLOW = {
     }
 }
 
+IMG2IMG_WORKFLOW = {
+    "client_id": "@client_id@",
+    "prompt": {
+        "1": {
+            "inputs": {
+                "seed": 1,
+                "steps": 20,
+                "cfg": 1,
+                "sampler_name": "euler",
+                "scheduler": "simple",
+                "denoise": 0.75,
+                "model": ["14", 0],
+                "positive": ["3", 0],
+                "negative": ["4", 0],
+                "latent_image": ["11", 0]
+            },
+            "class_type": "KSampler",
+            "_meta": {"title": "K采样器"}
+        },
+        "2": {
+            "inputs": {
+                "unet_name": "flux1-dev-fp8.safetensors",
+                "weight_dtype": "fp8_e4m3fn"
+            },
+            "class_type": "UNETLoader",
+            "_meta": {"title": "UNet加载器"}
+        },
+        "3": {
+            "inputs": {
+                "text": "",
+                "clip": ["9", 0]
+            },
+            "class_type": "CLIPTextEncode",
+            "_meta": {"title": "CLIP文本编码"}
+        },
+        "4": {
+            "inputs": {
+                "text": "",
+                "clip": ["9", 0]
+            },
+            "class_type": "CLIPTextEncode",
+            "_meta": {"title": "CLIP文本编码"}
+        },
+        "6": {
+            "inputs": {
+                "samples": ["1", 0],
+                "vae": ["7", 0]
+            },
+            "class_type": "VAEDecode",
+            "_meta": {"title": "VAE解码"}
+        },
+        "7": {
+            "inputs": {
+                "vae_name": "ae.safetensors"
+            },
+            "class_type": "VAELoader",
+            "_meta": {"title": "加载VAE"}
+        },
+        "8": {
+            "inputs": {
+                "images": ["6", 0]
+            },
+            "class_type": "PreviewImage",
+            "_meta": {"title": "预览图像"}
+        },
+        "9": {
+            "inputs": {
+                "clip_name1": "clip_l.safetensors",
+                "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+                "type": "flux",
+                "device": "default"
+            },
+            "class_type": "DualCLIPLoader",
+            "_meta": {"title": "双CLIP加载器"}
+        },
+        "10": {
+            "inputs": {
+                "image": ""
+            },
+            "class_type": "LoadImage",
+            "_meta": {"title": "加载图像"}
+        },
+        "11": {
+            "inputs": {
+                "pixels": ["10", 0],
+                "vae": ["7", 0]
+            },
+            "class_type": "VAEEncode",
+            "_meta": {"title": "VAE编码"}
+        },
+        "14": {
+            "inputs": {
+                "lora_name": "",
+                "strength_model": 1,
+                "model": ["2", 0]
+            },
+            "class_type": "LoraLoaderModelOnly",
+            "_meta": {"title": "LoRA加载器"}
+        }
+    }
+}
+
 
 s3_client = boto3.client(
     "s3",
@@ -167,6 +297,30 @@ def cleanup_cutout_tasks():
     overflow_count = len(CUTOUT_TASKS) - CUTOUT_TASK_MAX_COUNT
     for task_id, _ in sorted_items[:overflow_count]:
         CUTOUT_TASKS.pop(task_id, None)
+
+
+def cleanup_img2img_tasks():
+    now_ts = time.time()
+    expired_ids = []
+
+    for task_id, task in IMG2IMG_TASKS.items():
+        created_at_ts = task.get("createdAtTs", now_ts)
+        if now_ts - created_at_ts > CUTOUT_TASK_TTL_SECONDS:
+            expired_ids.append(task_id)
+
+    for task_id in expired_ids:
+        IMG2IMG_TASKS.pop(task_id, None)
+
+    if len(IMG2IMG_TASKS) <= CUTOUT_TASK_MAX_COUNT:
+        return
+
+    sorted_items = sorted(
+        IMG2IMG_TASKS.items(),
+        key=lambda item: item[1].get("createdAtTs", now_ts)
+    )
+    overflow_count = len(IMG2IMG_TASKS) - CUTOUT_TASK_MAX_COUNT
+    for task_id, _ in sorted_items[:overflow_count]:
+        IMG2IMG_TASKS.pop(task_id, None)
 
 
 def comfyui_headers():
@@ -274,6 +428,19 @@ def build_workflow_json(image_name, client_id):
     workflow["prompt"]["10"]["inputs"]["image"] = image_name
     workflow["prompt"]["11"]["inputs"]["model"] = BIREFNET_MODEL
     workflow["prompt"]["11"]["inputs"]["load_local_model"] = BIREFNET_LOAD_LOCAL_MODEL
+    return workflow
+
+
+def build_img2img_workflow_json(image_name, client_id, image_type):
+    config_item = IMG2IMG_CONFIGS.get(str(image_type), IMG2IMG_CONFIGS["4"])
+    workflow = copy.deepcopy(IMG2IMG_WORKFLOW)
+    workflow["client_id"] = client_id
+    workflow["prompt"]["1"]["inputs"]["seed"] = uuid.uuid4().int % 1_000_000_000
+    workflow["prompt"]["1"]["inputs"]["denoise"] = config_item["denoise"]
+    workflow["prompt"]["3"]["inputs"]["text"] = config_item["positive"]
+    workflow["prompt"]["4"]["inputs"]["text"] = config_item["negative"]
+    workflow["prompt"]["10"]["inputs"]["image"] = image_name
+    workflow["prompt"]["14"]["inputs"]["lora_name"] = config_item["lora"]
     return workflow
 
 
@@ -440,6 +607,84 @@ async def run_cutout_task(task_id, input_image):
             "clientId": client_id,
             "promptId": prompt_id,
             "filename": filename,
+            "uploadMode": upload_mode,
+            "uploadInput": upload_input,
+            "error": str(e),
+            "timings": timings,
+            "finishedAt": now_text()
+        })
+
+
+async def run_img2img_task(task_id, input_image, image_type):
+    total_start = time.time()
+    timings = {}
+    client_id = uuid.uuid4().hex
+    prompt_id = None
+    filename = None
+    upload_mode = None
+    upload_input = None
+
+    try:
+        IMG2IMG_TASKS[task_id].update({
+            "status": "running",
+            "clientId": client_id,
+            "startedAt": now_text()
+        })
+
+        step = time.time()
+        image_name, upload_input, upload_mode, upload_timings = await prepare_image_for_workflow(input_image)
+        timings.update(upload_timings)
+        timings["输入图处理总耗时"] = elapsed_ms(step)
+
+        step = time.time()
+        workflow = build_img2img_workflow_json(image_name, client_id, image_type)
+        timings["生成工作流JSON耗时"] = elapsed_ms(step)
+
+        step = time.time()
+        prompt_id = await send_workflow(workflow)
+        timings["提交ComfyUI工作流耗时"] = elapsed_ms(step)
+
+        step = time.time()
+        history_json = await poll_workflow_result(prompt_id)
+        timings["轮询ComfyUI结果耗时"] = elapsed_ms(step)
+
+        step = time.time()
+        filename = extract_filename(history_json, prompt_id)
+        if not filename:
+            raise RuntimeError(f"ComfyUI结果中未找到图片文件名: promptId={prompt_id}")
+        timings["提取结果文件名耗时"] = elapsed_ms(step)
+
+        step = time.time()
+        upload_result = await asyncio.to_thread(trim_upload_to_r2, filename, "temp", "")
+        timings.update(upload_result.get("timings") or {})
+        timings["结果图处理总耗时"] = elapsed_ms(step)
+        timings["整套流程总耗时"] = elapsed_ms(total_start)
+
+        IMG2IMG_TASKS[task_id].update({
+            "status": "success",
+            "clientId": client_id,
+            "promptId": prompt_id,
+            "filename": filename,
+            "type": str(image_type),
+            "uploadMode": upload_mode,
+            "uploadInput": upload_input,
+            "url": upload_result["url"],
+            "imageUrl": upload_result["url"],
+            "r2_url": upload_result["url"],
+            "key": upload_result["key"],
+            "resultFilename": upload_result["filename"],
+            "timings": timings,
+            "finishedAt": now_text()
+        })
+
+    except Exception as e:
+        timings["整套流程总耗时"] = elapsed_ms(total_start)
+        IMG2IMG_TASKS[task_id].update({
+            "status": "fail",
+            "clientId": client_id,
+            "promptId": prompt_id,
+            "filename": filename,
+            "type": str(image_type),
             "uploadMode": upload_mode,
             "uploadInput": upload_input,
             "error": str(e),
@@ -626,6 +871,61 @@ async def cutout_result(request):
         }, status=400)
 
     task = CUTOUT_TASKS.get(task_id)
+    if task is None:
+        return web.json_response({
+            "status": "not_found",
+            "taskId": task_id,
+            "error": "任务不存在或ComfyUI已重启"
+        }, status=404)
+
+    return web.json_response(task)
+
+
+@routes.post("/my_api/img2img/start")
+async def img2img_start(request):
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({
+            "status": "fail",
+            "error": "请求体必须是JSON"
+        }, status=400)
+
+    input_image = data.get("inputImage") or data.get("input_image")
+    image_type = data.get("type", "4")
+    if not input_image or not str(input_image).strip():
+        return web.json_response({
+            "status": "fail",
+            "error": "inputImage不能为空"
+        }, status=400)
+
+    cleanup_img2img_tasks()
+    task_id = uuid.uuid4().hex
+    IMG2IMG_TASKS[task_id] = {
+        "taskId": task_id,
+        "status": "pending",
+        "type": str(image_type),
+        "createdAt": now_text(),
+        "createdAtTs": time.time()
+    }
+    asyncio.create_task(run_img2img_task(task_id, str(input_image).strip(), image_type))
+
+    return web.json_response({
+        "status": "running",
+        "taskId": task_id
+    })
+
+
+@routes.get("/my_api/img2img/result")
+async def img2img_result(request):
+    task_id = request.rel_url.query.get("taskId") or request.rel_url.query.get("task_id")
+    if not task_id:
+        return web.json_response({
+            "status": "fail",
+            "error": "taskId不能为空"
+        }, status=400)
+
+    task = IMG2IMG_TASKS.get(task_id)
     if task is None:
         return web.json_response({
             "status": "not_found",

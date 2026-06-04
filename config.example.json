@@ -11,6 +11,6 @@
   "comfyui_poll_timeout_seconds": 120,
   "cutout_task_ttl_seconds": 3600,
   "cutout_task_max_count": 1000,
-  "birefnet_model": "ZhengPeng7/BiRefNet",
+  "birefnet_model": "BiRefNet",
   "birefnet_load_local_model": true
 }

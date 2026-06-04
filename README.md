@@ -6,6 +6,7 @@
 
 - Java 只需要发起任务和查询任务结果
 - 插件内部完成输入图下载、本地保存、工作流提交、结果轮询、透明区域裁剪、结果图上传 R2
+- 支持抠图任务和图生图任务
 - 提供轻量存活检测接口，方便监控
 - 提供目录和 R2 健康检测接口
 
@@ -49,7 +50,7 @@ pip install boto3 pillow
   "comfyui_poll_timeout_seconds": 120,
   "cutout_task_ttl_seconds": 3600,
   "cutout_task_max_count": 1000,
-  "birefnet_model": "ZhengPeng7/BiRefNet",
+  "birefnet_model": "BiRefNet",
   "birefnet_load_local_model": true
 }
 ```
@@ -130,6 +131,50 @@ GET /my_api/cutout/result?taskId=xxx
 }
 ```
 
+### 发起图生图任务
+
+```bash
+POST /my_api/img2img/start
+```
+
+请求体：
+
+```json
+{
+  "inputImage": "https://example.com/input.jpg",
+  "type": "1"
+}
+```
+
+`type` 对应 Java 里原来的四套图生图风格参数：`1`、`2`、`3`、默认 `4`。
+
+返回：
+
+```json
+{
+  "status": "running",
+  "taskId": "xxx"
+}
+```
+
+### 查询图生图结果
+
+```bash
+GET /my_api/img2img/result?taskId=xxx
+```
+
+成功返回：
+
+```json
+{
+  "taskId": "xxx",
+  "status": "success",
+  "imageUrl": "https://example.com/removed/20260604/xxx.png",
+  "url": "https://example.com/removed/20260604/xxx.png",
+  "timings": {}
+}
+```
+
 ### 健康检测
 
 ```bash
@@ -148,4 +193,10 @@ curl -X POST "http://127.0.0.1:8188/my_api/cutout/start" \
   -d '{"inputImage":"https://example.com/input.jpg"}'
 
 curl "http://127.0.0.1:8188/my_api/cutout/result?taskId=xxx"
+
+curl -X POST "http://127.0.0.1:8188/my_api/img2img/start" \
+  -H "Content-Type: application/json" \
+  -d '{"inputImage":"https://example.com/input.jpg","type":"1"}'
+
+curl "http://127.0.0.1:8188/my_api/img2img/result?taskId=xxx"
 ```
