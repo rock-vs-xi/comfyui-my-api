@@ -10,7 +10,7 @@ from io import BytesIO
 import boto3
 from botocore.config import Config
 from urllib.parse import urlparse, unquote
-from aiohttp import web, ClientSession, ClientTimeout, FormData
+from aiohttp import web, ClientSession, ClientTimeout
 from PIL import Image
 
 import folder_paths
@@ -206,6 +206,34 @@ def guess_filename_from_url(image_url):
     return name
 
 
+def save_input_image(image_bytes, image_url):
+    input_dir = folder_paths.get_directory_by_type("input")
+    if input_dir is None:
+        raise RuntimeError("无法获取ComfyUI input目录")
+
+    subfolder = "my_api"
+    target_dir = os.path.abspath(os.path.join(input_dir, subfolder))
+    input_dir_abs = os.path.abspath(input_dir)
+
+    if os.path.commonpath((target_dir, input_dir_abs)) != input_dir_abs:
+        raise RuntimeError("input目录路径不合法")
+
+    os.makedirs(target_dir, exist_ok=True)
+
+    source_name = guess_filename_from_url(image_url)
+    _, ext = os.path.splitext(source_name)
+    if ext.lower() not in [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"]:
+        ext = ".png"
+
+    filename = f"{uuid.uuid4().hex}{ext.lower()}"
+    filepath = os.path.join(target_dir, filename)
+
+    with open(filepath, "wb") as f:
+        f.write(image_bytes)
+
+    return f"{subfolder}/{filename}"
+
+
 async def download_image_bytes(session, image_url):
     async with session.get(image_url, allow_redirects=True) as response:
         body = await response.read()
@@ -220,7 +248,7 @@ async def download_image_bytes(session, image_url):
         return body, content_type
 
 
-async def upload_image_to_comfyui(image_url):
+async def prepare_image_for_workflow(image_url):
     total_start = time.time()
     timings = {}
 
@@ -230,42 +258,12 @@ async def upload_image_to_comfyui(image_url):
         image_bytes, content_type = await download_image_bytes(session, image_url)
         timings["下载输入图片耗时"] = elapsed_ms(step)
 
-        filename = guess_filename_from_url(image_url)
-
         step = time.time()
-        form = FormData()
-        form.add_field(
-            "image",
-            image_bytes,
-            filename=filename,
-            content_type=content_type
-        )
-        form.add_field("type", "input")
-        form.add_field("overwrite", "true")
-
-        async with session.post(
-            f"{COMFYUI_BASE_URL}/api/upload/image",
-            data=form,
-            headers=comfyui_headers(),
-            allow_redirects=False
-        ) as response:
-            text = await response.text()
-            if response.status < 200 or response.status >= 300:
-                raise RuntimeError(f"上传图片到ComfyUI失败: {response.status}, {text}")
-
-            data = parse_json_response(text, "上传图片到ComfyUI")
-            name = data.get("name")
-            if not name:
-                raise RuntimeError(f"ComfyUI上传图片未返回name: {text}")
-
-            subfolder = data.get("subfolder") or ""
-            if subfolder:
-                name = f"{subfolder}/{name}"
-
-        timings["上传图片到ComfyUI耗时"] = elapsed_ms(step)
+        name = await asyncio.to_thread(save_input_image, image_bytes, image_url)
+        timings["保存输入图片到ComfyUI目录耗时"] = elapsed_ms(step)
 
     timings["uploadImageByUrl总耗时"] = elapsed_ms(total_start)
-    return name, image_url, "下载后文件上传", timings
+    return name, image_url, "下载后本地加载", timings
 
 
 def build_workflow_json(image_name, client_id):
@@ -388,7 +386,7 @@ async def run_cutout_task(task_id, input_image):
         })
 
         step = time.time()
-        image_name, upload_input, upload_mode, upload_timings = await upload_image_to_comfyui(input_image)
+        image_name, upload_input, upload_mode, upload_timings = await prepare_image_for_workflow(input_image)
         timings.update(upload_timings)
         timings["输入图处理总耗时"] = elapsed_ms(step)
 
