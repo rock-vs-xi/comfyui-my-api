@@ -9,6 +9,7 @@ from io import BytesIO
 
 import boto3
 from botocore.config import Config
+from urllib.parse import urlparse, unquote
 from aiohttp import web, ClientSession, ClientTimeout, FormData
 from PIL import Image
 
@@ -195,17 +196,53 @@ def put_object_to_r2(bucket_name, key, body, content_type):
     )
 
 
+def guess_filename_from_url(image_url):
+    path = urlparse(image_url).path
+    name = os.path.basename(unquote(path))
+    if not name:
+        name = "input.png"
+    if "." not in name:
+        name = f"{name}.png"
+    return name
+
+
+async def download_image_bytes(session, image_url):
+    async with session.get(image_url, allow_redirects=True) as response:
+        body = await response.read()
+        if response.status < 200 or response.status >= 300:
+            preview = body[:300].decode("utf-8", errors="replace")
+            raise RuntimeError(f"下载输入图片失败: {response.status}, {preview}")
+
+        content_type = response.headers.get("Content-Type") or "application/octet-stream"
+        content_type = content_type.split(";")[0].strip() or "application/octet-stream"
+        if not body:
+            raise RuntimeError(f"下载输入图片为空: {image_url}")
+        return body, content_type
+
+
 async def upload_image_to_comfyui(image_url):
     total_start = time.time()
     timings = {}
 
-    form = FormData()
-    form.add_field("image", image_url)
-    form.add_field("type", "input")
-
     timeout = ClientTimeout(total=COMFYUI_TIMEOUT_SECONDS)
-    step = time.time()
     async with ClientSession(timeout=timeout) as session:
+        step = time.time()
+        image_bytes, content_type = await download_image_bytes(session, image_url)
+        timings["下载输入图片耗时"] = elapsed_ms(step)
+
+        filename = guess_filename_from_url(image_url)
+
+        step = time.time()
+        form = FormData()
+        form.add_field(
+            "image",
+            image_bytes,
+            filename=filename,
+            content_type=content_type
+        )
+        form.add_field("type", "input")
+        form.add_field("overwrite", "true")
+
         async with session.post(
             f"{COMFYUI_BASE_URL}/api/upload/image",
             data=form,
@@ -221,9 +258,14 @@ async def upload_image_to_comfyui(image_url):
             if not name:
                 raise RuntimeError(f"ComfyUI上传图片未返回name: {text}")
 
-    timings["上传图片到ComfyUI耗时"] = elapsed_ms(step)
+            subfolder = data.get("subfolder") or ""
+            if subfolder:
+                name = f"{subfolder}/{name}"
+
+        timings["上传图片到ComfyUI耗时"] = elapsed_ms(step)
+
     timings["uploadImageByUrl总耗时"] = elapsed_ms(total_start)
-    return name, image_url, "URL上传", timings
+    return name, image_url, "下载后文件上传", timings
 
 
 def build_workflow_json(image_name, client_id):
