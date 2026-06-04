@@ -174,6 +174,14 @@ def comfyui_headers():
     return {}
 
 
+def parse_json_response(text, action):
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        preview = (text or "").replace("\n", " ")[:300]
+        raise RuntimeError(f"{action}返回非JSON响应: {e}. 响应内容: {preview}")
+
+
 def build_public_url(public_base, key):
     return f"{public_base.rstrip('/')}/{key}"
 
@@ -201,13 +209,14 @@ async def upload_image_to_comfyui(image_url):
         async with session.post(
             f"{COMFYUI_BASE_URL}/api/upload/image",
             data=form,
-            headers=comfyui_headers()
+            headers=comfyui_headers(),
+            allow_redirects=False
         ) as response:
             text = await response.text()
             if response.status < 200 or response.status >= 300:
                 raise RuntimeError(f"上传图片到ComfyUI失败: {response.status}, {text}")
 
-            data = json.loads(text)
+            data = parse_json_response(text, "上传图片到ComfyUI")
             name = data.get("name")
             if not name:
                 raise RuntimeError(f"ComfyUI上传图片未返回name: {text}")
@@ -230,13 +239,14 @@ async def send_workflow(workflow):
         async with session.post(
             f"{COMFYUI_BASE_URL}/api/prompt",
             json=workflow,
-            headers=comfyui_headers()
+            headers=comfyui_headers(),
+            allow_redirects=False
         ) as response:
             text = await response.text()
             if response.status < 200 or response.status >= 300:
                 raise RuntimeError(f"提交ComfyUI工作流失败: {response.status}, {text}")
 
-            data = json.loads(text)
+            data = parse_json_response(text, "提交ComfyUI工作流")
             prompt_id = data.get("prompt_id")
             if not prompt_id:
                 raise RuntimeError(f"ComfyUI工作流未返回prompt_id: {text}")
@@ -251,14 +261,15 @@ async def poll_workflow_result(prompt_id):
         while True:
             async with session.get(
                 f"{COMFYUI_BASE_URL}/api/history/{prompt_id}",
-                headers=comfyui_headers()
+                headers=comfyui_headers(),
+                allow_redirects=False
             ) as response:
                 text = await response.text()
                 if response.status < 200 or response.status >= 300:
                     raise RuntimeError(f"查询ComfyUI结果失败: {response.status}, {text}")
 
                 if text and len(text.strip()) > 2:
-                    return json.loads(text)
+                    return parse_json_response(text, "查询ComfyUI结果")
 
             if time.time() - start > COMFYUI_POLL_TIMEOUT_SECONDS:
                 raise RuntimeError(f"轮询ComfyUI结果超时: promptId={prompt_id}")
