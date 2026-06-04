@@ -4,6 +4,7 @@
 
 ## 功能
 
+- 提供插件存活检测接口
 - 提供插件健康检测接口
 - 检测 ComfyUI 的 `temp`、`output`、`input` 目录状态
 - 检测 R2 是否可以正常写入、校验和删除文件
@@ -58,7 +59,15 @@ chmod 600 /workspace/config/config.json
 
 ## 接口
 
-### 1. 插件健康检测
+### 1. 存活检测
+
+```bash
+GET /my_api/ping
+```
+
+用于监控探针，只检测插件路由是否存活，不访问目录，也不访问 R2。
+
+### 2. 插件健康检测
 
 ```bash
 GET /my_api/health
@@ -66,7 +75,7 @@ GET /my_api/health
 
 用于检测插件是否加载，以及 ComfyUI 的 `temp`、`output`、`input` 目录是否可用。
 
-### 2. R2 健康检测
+### 3. R2 健康检测
 
 ```bash
 GET /my_api/health/r2
@@ -74,7 +83,7 @@ GET /my_api/health/r2
 
 用于检测 R2 是否可以正常上传、校验和删除文件。
 
-### 3. 完整健康检测
+### 4. 完整健康检测
 
 ```bash
 GET /my_api/health/full
@@ -82,7 +91,7 @@ GET /my_api/health/full
 
 包含目录检测和 R2 检测。
 
-### 4. 裁剪透明区域并上传 R2
+### 5. 裁剪透明区域并上传 R2
 
 ```bash
 GET /trim_upload_r2?filename=ComfyUI_temp_xxx.png&type=temp
@@ -128,6 +137,7 @@ GET /trim_upload_r2?filename=ComfyUI_temp_xxx.png&type=temp
 ## 调试命令
 
 ```bash
+curl http://127.0.0.1:7860/my_api/ping
 curl http://127.0.0.1:7860/my_api/health
 curl http://127.0.0.1:7860/my_api/health/r2
 curl http://127.0.0.1:7860/my_api/health/full

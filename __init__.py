@@ -202,6 +202,15 @@ def trim_transparent_area(image_bytes):
     return out.getvalue()
 
 
+@routes.get("/my_api/ping")
+async def ping(request):
+    return web.json_response({
+        "status": "ok",
+        "plugin": "my_api",
+        "time": now_text()
+    })
+
+
 @routes.get("/my_api/health")
 async def health(request):
     temp_check = check_directory("temp")
